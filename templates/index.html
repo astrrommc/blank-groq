@@ -106,14 +106,14 @@ header span {
 #chat {
   flex: 1;
   width: 100%;
-  padding-top: 110px;
-  padding-bottom: 120px;
-  padding-left: max(20px, calc((100% - 800px) / 2));
-  padding-right: max(20px, calc((100% - 800px) / 2));
+  padding-top: 130px;
+  padding-bottom: 140px;
+  padding-left: max(32px, calc((100% - 780px) / 2));
+  padding-right: max(32px, calc((100% - 780px) / 2));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 36px;
   scroll-behavior: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -124,11 +124,11 @@ header span {
 
 .msg {
   width: fit-content;
-  max-width: 85%;
-  line-height: 1.6;
+  max-width: 80%;
+  line-height: 1.85;
   font-size: 1rem;
   position: relative;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 }
 
 .msg-content { 
@@ -146,7 +146,7 @@ header span {
 
 .bot {
   align-self: flex-start;
-  color: #b0b0b0; 
+  color: #a0a0a0; 
 }
 
 .bot::before {
@@ -154,9 +154,9 @@ header span {
   display: block;
   font-size: 0.65rem;
   line-height: 1;
-  margin-bottom: 6px; 
-  opacity: 0.5;
-  letter-spacing: 1px;
+  margin-bottom: 10px; 
+  opacity: 0.35;
+  letter-spacing: 2px;
 }
 
 .copy-btn {
@@ -175,12 +175,16 @@ header span {
 .copy-btn svg { width: 14px; height: 14px; fill: #555; transition: fill 0.2s; }
 .copy-btn:hover svg { fill: #fff; }
 
-.typing-dots { display: inline-flex; gap: 4px; padding: 5px 0; margin-left: 2px; }
-.typing-dots span { width: 6px; height: 6px; background-color: #555; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
-.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes bounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: rgba(255,255,255,0.45);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 6px 0 4px 2px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .typing-cursor::after { content: "▋"; display: inline-block; animation: blink 1s step-end infinite; opacity: 0.7; margin-left: 2px; vertical-align: baseline; font-size: 0.8em; }
 @keyframes blink { 50% { opacity: 0; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -385,7 +389,7 @@ function showLoading() {
   const div = document.createElement("div");
   div.className = "msg bot";
   div.id = id;
-  div.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
+  div.innerHTML = `<div class="spinner"></div>`;
   chat.appendChild(div);
   scrollToBottom();
   return id;
