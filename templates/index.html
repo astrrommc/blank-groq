@@ -474,13 +474,17 @@ function typeMsg(text, cls) {
   const div = document.createElement("div");
   div.className = "msg " + cls;
 
+  // Spinner shown immediately while typing begins
+  const spinner = document.createElement("div");
+  spinner.className = "spinner";
+
   const textSpan = document.createElement("span");
   textSpan.className = "msg-content";
 
-  // Separate inline cursor element — NOT a CSS pseudo-element
   const cursor = document.createElement("span");
   cursor.className = "cursor-blink";
 
+  div.appendChild(spinner);
   div.appendChild(textSpan);
   div.appendChild(cursor);
   chat.appendChild(div);
@@ -491,12 +495,13 @@ function typeMsg(text, cls) {
 
   function type() {
     if (i < text.length) {
+      // Remove spinner on first character
+      if (i === 0) spinner.remove();
       textSpan.textContent += text.charAt(i);
       i++;
-      autoScroll(); // respects userScrolledUp — won't hijack scroll
+      autoScroll();
       setTimeout(type, speed);
     } else {
-      // Done — remove cursor, add copy button
       cursor.remove();
       div.insertAdjacentHTML('beforeend', getCopyBtnHTML());
     }
