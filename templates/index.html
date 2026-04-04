@@ -15,11 +15,11 @@
   --font-stack: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
 }
 
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  outline: none; 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  outline: none;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -27,7 +27,7 @@ body {
   background: var(--bg-color);
   color: var(--text-primary);
   font-family: var(--font-stack);
-  height: 100dvh; 
+  height: 100dvh;
   width: 100vw;
   display: flex;
   justify-content: center;
@@ -116,7 +116,7 @@ header span {
   -webkit-overflow-scrolling: touch;
 }
 
-#chat::-webkit-scrollbar { width: 6px; } 
+#chat::-webkit-scrollbar { width: 6px; }
 #chat::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
 #chat::-webkit-scrollbar-track { background: transparent; }
 
@@ -129,8 +129,8 @@ header span {
   padding-bottom: 4px;
 }
 
-.msg-content { 
-  display: block; 
+.msg-content {
+  display: block;
   white-space: pre-wrap;
   word-break: break-word;
   letter-spacing: 0.01em;
@@ -148,14 +148,15 @@ header span {
   color: #a0a0a0;
 }
 
-.bot::before {
-  content: "BLANK_";
+/* FIX: label is now a real element so it doesn't flash weirdly mid-typing */
+.bot-label {
   display: block;
   font-size: 0.6rem;
   line-height: 1;
   margin-bottom: 10px;
   opacity: 0.35;
   letter-spacing: 2px;
+  color: #fff;
 }
 
 .copy-btn {
@@ -165,7 +166,7 @@ header span {
   background: transparent;
   border: none;
   cursor: pointer;
-  opacity: 0; 
+  opacity: 0;
   transition: opacity 0.2s;
   padding: 4px;
 }
@@ -174,7 +175,7 @@ header span {
 .copy-btn svg { width: 14px; height: 14px; fill: #555; transition: fill 0.2s; }
 .copy-btn:hover svg { fill: #fff; }
 
-/* Circular spinner — shown while waiting for API response */
+/* Spinner — shown while waiting AND while typing */
 .spinner {
   width: 20px;
   height: 20px;
@@ -186,7 +187,7 @@ header span {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Blinking cursor — shown only during typewriter, inline after text */
+/* Blinking cursor — inline after text during typewriter */
 .cursor-blink {
   display: inline-block;
   width: 2px;
@@ -199,6 +200,7 @@ header span {
 @keyframes blink { 50% { opacity: 0; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ── Input area ── */
 .input-area {
   position: fixed;
   bottom: 24px;
@@ -208,7 +210,8 @@ header span {
   max-width: 800px;
   z-index: 100;
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
   background: rgba(28, 28, 28, 0.7);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
@@ -228,9 +231,35 @@ input {
   color: white;
   padding: 0 10px;
   font-size: 1.05rem;
+  min-width: 0; /* FIX: prevents input from overflowing flex container */
 }
 input::placeholder { color: #555; }
 
+/* ── Mic button ── */
+.mic-btn {
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  transition: background 0.2s;
+  flex-shrink: 0; /* FIX: never squish */
+}
+.mic-btn svg { width: 20px; height: 20px; fill: #555; transition: fill 0.2s; }
+.mic-btn:hover svg { fill: #bbb; }
+.mic-btn.listening { background: rgba(255, 50, 50, 0.12); }
+.mic-btn.listening svg { fill: #ff4444; animation: pulse 1s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.88); }
+}
+
+/* ── Send button ── */
 .send-btn {
   border: none;
   width: 44px;
@@ -243,17 +272,18 @@ input::placeholder { color: #555; }
   background: white;
   transition: transform 0.2s, opacity 0.2s;
   animation: buttonGlow 3s ease-in-out infinite;
+  flex-shrink: 0; /* FIX: never squish */
 }
 .send-btn:hover { transform: scale(1.05); }
 .send-btn svg { width: 20px; height: 20px; fill: black; transform: translateX(2px); }
 .send-btn:disabled { opacity: 0.5; animation: none; transform: none; }
 
 @keyframes buttonGlow {
-  0%, 100% { box-shadow: 0 0 0px rgba(255, 255, 255, 0); }
-  50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+  0%, 100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+  50% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
 }
 
-/* Clear button */
+/* ── Clear button ── */
 .clear-btn {
   position: fixed;
   top: 16px;
@@ -273,7 +303,7 @@ input::placeholder { color: #555; }
 }
 .clear-btn:hover { color: #aaa; border-color: rgba(255,255,255,0.2); }
 
-/* Scroll-to-bottom arrow */
+/* ── Scroll-to-bottom arrow ── */
 #scrollBtn {
   position: fixed;
   bottom: 100px;
@@ -303,19 +333,44 @@ input::placeholder { color: #555; }
 #scrollBtn:hover { background: rgba(60,60,60,0.95); color: #fff; }
 #scrollBtn svg { width: 16px; height: 16px; fill: currentColor; }
 
+/* ── Voice indicator toast ── */
+#voiceToast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(255,50,50,0.12);
+  border: 1px solid rgba(255,80,80,0.25);
+  color: #ff6666;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 98;
+}
+#voiceToast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 @media (max-width: 768px) {
   header h1 { font-size: 1.2rem; }
   .msg { max-width: 90%; font-size: 0.95rem; }
-  #chat { padding: 100px 15px 110px; } 
+  #chat { padding: 100px 15px 110px; }
   .input-area { bottom: 12px; width: 94%; padding: 8px 12px; border-radius: 18px; }
   .copy-btn { opacity: 0.5; bottom: -24px; }
   #scrollBtn { bottom: 88px; }
+  #voiceToast { bottom: 82px; }
 }
 </style>
 </head>
 
 <body>
-
 <div class="app-container">
   <header>
     <h1>BLANK_</h1>
@@ -332,19 +387,29 @@ input::placeholder { color: #555; }
 
   <button class="clear-btn" onclick="clearChat()">Clear</button>
 
-  <!-- Scroll to bottom arrow -->
   <button id="scrollBtn" onclick="forceScrollBottom()" title="Scroll to bottom">
     <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
   </button>
 
+  <div id="voiceToast">● Listening…</div>
+
   <div id="chat">
     <div class="msg bot">
+      <span class="bot-label">BLANK_</span>
       <span class="msg-content">Ready.</span>
     </div>
   </div>
 
   <div class="input-area">
     <input id="input" placeholder="Ask BLANK_" autocomplete="off" />
+
+    <!-- Mic button -->
+    <button id="micBtn" class="mic-btn" onclick="toggleVoice()" title="Voice input">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3.01 2.83 5.4 5.91 5.88V20H9c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2v-2.02c3.08-.47 5.42-2.87 5.91-5.88.1-.6-.39-1.1-1-1.1z"/>
+      </svg>
+    </button>
+
     <button id="sendBtn" class="send-btn" onclick="send()">
       <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
     </button>
@@ -352,17 +417,18 @@ input::placeholder { color: #555; }
 </div>
 
 <script>
-const chat = document.getElementById("chat");
-const input = document.getElementById("input");
-const btn = document.getElementById("sendBtn");
+const chat      = document.getElementById("chat");
+const input     = document.getElementById("input");
+const btn       = document.getElementById("sendBtn");
+const micBtn    = document.getElementById("micBtn");
 const modelSelect = document.getElementById("modelSelect");
 const scrollBtn = document.getElementById("scrollBtn");
+const voiceToast = document.getElementById("voiceToast");
 
 let history = [];
-// Track if user has scrolled up manually
 let userScrolledUp = false;
 
-// Detect manual scroll up
+/* ── Scroll helpers ── */
 chat.addEventListener("scroll", () => {
   const distFromBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight;
   userScrolledUp = distFromBottom > 80;
@@ -375,25 +441,26 @@ function forceScrollBottom() {
   scrollBtn.classList.remove("visible");
 }
 
-// Only auto-scroll if user hasn't scrolled up
 function autoScroll() {
-  if (!userScrolledUp) {
-    chat.scrollTop = chat.scrollHeight;
-  }
+  if (!userScrolledUp) chat.scrollTop = chat.scrollHeight;
 }
 
+/* ── Send on Enter ── */
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") send();
 });
 
+/* ── Main send ── */
 async function send() {
   const text = input.value.trim();
   if (!text || btn.disabled) return;
 
-  addMsg(text, "user");
+  // Stop voice if active
+  stopVoice();
+
+  addUserMsg(text);
   input.value = "";
   btn.disabled = true;
-  // Always scroll to bottom when user sends a message
   forceScrollBottom();
 
   const loadingId = showLoading();
@@ -413,53 +480,73 @@ async function send() {
 
     if (!res.ok) throw new Error("Server error");
     const data = await res.json();
-
     const reply = (data.reply || "No response received.").trim();
 
     history.push({ role: "user", content: text });
     history.push({ role: "assistant", content: reply });
 
-    typeMsg(reply, "bot");
+    typeMsg(reply);
 
   } catch (err) {
     removeLoading(loadingId);
-    typeMsg("Connection lost. Check system status.", "bot");
+    typeMsg("Connection lost. Check system status.");
   } finally {
     btn.disabled = false;
     input.focus();
   }
 }
 
+/* ── Clear ── */
 function clearChat() {
   history = [];
-  chat.innerHTML = '';
+  chat.innerHTML = "";
   const div = document.createElement("div");
   div.className = "msg bot";
-  div.innerHTML = `<span class="msg-content">Ready.</span>`;
+  div.innerHTML = `<span class="bot-label">BLANK_</span><span class="msg-content">Ready.</span>`;
   chat.appendChild(div);
   userScrolledUp = false;
   scrollBtn.classList.remove("visible");
 }
 
-function addMsg(text, cls) {
+/* ── User message (typewriter effect) ── */
+function addUserMsg(text) {
   const div = document.createElement("div");
-  div.className = "msg " + cls;
-  div.innerHTML = `<span class="msg-content">${escapeHtml(text)}</span>` + getCopyBtnHTML();
+  div.className = "msg user";
+
+  const textSpan = document.createElement("span");
+  textSpan.className = "msg-content";
+
+  const cursor = document.createElement("span");
+  cursor.className = "cursor-blink";
+
+  div.appendChild(textSpan);
+  div.appendChild(cursor);
   chat.appendChild(div);
   autoScroll();
+
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      // FIX: use textContent per char — safe, no XSS risk
+      textSpan.textContent += text.charAt(i);
+      i++;
+      autoScroll();
+      setTimeout(type, 14);
+    } else {
+      cursor.remove();
+      div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
+    }
+  }
+  type();
 }
 
-function escapeHtml(str) {
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
+/* ── Loading spinner (while waiting for API) ── */
 function showLoading() {
   const id = "loading-" + Date.now();
   const div = document.createElement("div");
   div.className = "msg bot";
   div.id = id;
-  // Spinner only — no text, no cursor
-  div.innerHTML = `<div class="spinner"></div>`;
+  div.innerHTML = `<span class="bot-label">BLANK_</span><div class="spinner"></div>`;
   chat.appendChild(div);
   autoScroll();
   return id;
@@ -470,11 +557,16 @@ function removeLoading(id) {
   if (el) el.remove();
 }
 
-function typeMsg(text, cls) {
+/* ── Bot message with spinner → typewriter ── */
+function typeMsg(text) {
   const div = document.createElement("div");
-  div.className = "msg " + cls;
+  div.className = "msg bot";
 
-  // Spinner shown immediately while typing begins
+  const label = document.createElement("span");
+  label.className = "bot-label";
+  label.textContent = "BLANK_";
+
+  // Spinner shown first, while first chars are buffered
   const spinner = document.createElement("div");
   spinner.className = "spinner";
 
@@ -484,7 +576,8 @@ function typeMsg(text, cls) {
   const cursor = document.createElement("span");
   cursor.className = "cursor-blink";
 
-  div.appendChild(spinner);
+  div.appendChild(label);
+  div.appendChild(spinner);   // spinner visible immediately
   div.appendChild(textSpan);
   div.appendChild(cursor);
   chat.appendChild(div);
@@ -495,39 +588,113 @@ function typeMsg(text, cls) {
 
   function type() {
     if (i < text.length) {
-      // Remove spinner on first character
-      if (i === 0) spinner.remove();
+      // FIX: remove spinner on very first character
+      if (i === 0 && spinner.parentNode) spinner.remove();
       textSpan.textContent += text.charAt(i);
       i++;
       autoScroll();
       setTimeout(type, speed);
     } else {
       cursor.remove();
-      div.insertAdjacentHTML('beforeend', getCopyBtnHTML());
+      div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
     }
   }
   type();
 }
 
+/* ── Copy button ── */
 function copyText(btnElement) {
-  const msgDiv = btnElement.parentElement;
-  const textSpan = msgDiv.querySelector('.msg-content');
-  navigator.clipboard.writeText(textSpan.innerText).then(() => {
+  const msgDiv = btnElement.closest(".msg");
+  const textSpan = msgDiv.querySelector(".msg-content");
+  if (!textSpan) return;
+  navigator.clipboard.writeText(textSpan.textContent).then(() => {
     btnElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#00ff87"/></svg>`;
     setTimeout(() => {
-      btnElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>`;
+      btnElement.innerHTML = copyIconSVG();
     }, 2000);
   });
 }
 
+function copyIconSVG() {
+  return `<svg viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>`;
+}
+
 function getCopyBtnHTML() {
-  return `
-    <button class="copy-btn" onclick="copyText(this)" title="Copy">
-      <svg viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>
-    </button>
-  `;
+  return `<button class="copy-btn" onclick="copyText(this)" title="Copy">${copyIconSVG()}</button>`;
+}
+
+/* ════════════════════════════════════════
+   VOICE INPUT
+   Uses Web Speech API (Chrome/Edge/Safari)
+   ════════════════════════════════════════ */
+let recognition = null;
+let isListening  = false;
+
+function toggleVoice() {
+  if (isListening) {
+    stopVoice();
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    // FIX: graceful fallback instead of alert blocking UI
+    typeMsg("Voice input isn't supported in this browser. Try Chrome or Edge.");
+    return;
+  }
+
+  // FIX: always create a fresh instance — reusing a stopped one throws errors
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = true;  // show words as you speak
+  recognition.continuous = false;     // auto-stop after pause
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add("listening");
+    voiceToast.classList.add("visible");
+  };
+
+  recognition.onresult = (e) => {
+    // FIX: concat all result segments correctly
+    let interim = "";
+    let final   = "";
+    for (let i = 0; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    input.value = final || interim;
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove("listening");
+    voiceToast.classList.remove("visible");
+    recognition = null;
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    micBtn.classList.remove("listening");
+    voiceToast.classList.remove("visible");
+    recognition = null;
+    // Only surface real errors — "no-speech" is normal
+    if (e.error !== "no-speech" && e.error !== "aborted") {
+      console.warn("Voice error:", e.error);
+    }
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  // FIX: null-check before calling stop — prevents crash on double-tap
+  if (recognition && isListening) {
+    recognition.stop();
+  }
 }
 </script>
-
 </body>
 </html>
