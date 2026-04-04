@@ -755,4 +755,286 @@ function autoScroll() {
    TEXTAREA AUTO-RESIZE
 ══════════════════════════════════════ */
 function autoResize() {
-  input.style
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 160) + "px";
+}
+input.addEventListener("input", autoResize);
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+/* ══════════════════════════════════════
+   SEND
+══════════════════════════════════════ */
+async function send() {
+  const text = input.value.trim();
+  if (!text || btn.disabled) return;
+
+  // Auto-create a session if none active
+  if (!currentSessId) {
+    try {
+      const r = await fetch("/sessions/new", { method: "POST" });
+      const d = await r.json();
+      currentSessId = d.id;
+      await loadSessions();
+    } catch(e) { /* continue without saving */ }
+  }
+
+  stopVoice();
+  addUserMsg(text);
+  input.value = "";
+  autoResize();
+  btn.disabled = true;
+  forceScrollBottom();
+
+  const loadingId = showLoading();
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message:    text,
+        history:    history,
+        model:      modelSelect.value,
+        session_id: currentSessId
+      })
+    });
+
+    removeLoading(loadingId);
+    if (!res.ok) throw new Error("Server error");
+
+    const data  = await res.json();
+    const reply = (data.reply || "No response received.").trim();
+
+    history.push({ role: "user",      content: text  });
+    history.push({ role: "assistant", content: reply });
+
+    typeMsg(reply);
+
+    // Refresh sidebar title after first message
+    if (history.length === 2) loadSessions();
+
+  } catch(err) {
+    removeLoading(loadingId);
+    typeMsg("Connection lost. Check system status.");
+  } finally {
+    btn.disabled = false;
+    input.focus();
+  }
+}
+
+/* ══════════════════════════════════════
+   UI HELPERS
+══════════════════════════════════════ */
+function clearChatUI() {
+  chatEl.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.innerHTML = `<span class="bot-label">BLANK_</span><span class="msg-content">Ready.</span>`;
+  chatEl.appendChild(div);
+  userScrolledUp = false;
+  isTyping = false;
+  scrollBtn.classList.remove("visible");
+}
+
+/* Typewriter user msg */
+function addUserMsg(text) {
+  const div = document.createElement("div");
+  div.className = "msg user";
+  const span = document.createElement("span");
+  span.className = "msg-content";
+  const dots = makeDots();
+  div.appendChild(span);
+  div.appendChild(dots);
+  chatEl.appendChild(div);
+  autoScroll();
+
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      span.textContent += text.charAt(i++);
+      autoScroll();
+      setTimeout(type, 14);
+    } else {
+      dots.remove();
+      div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
+    }
+  }
+  type();
+}
+
+/* Instant user msg (history load) */
+function addUserMsgInstant(text) {
+  const div = document.createElement("div");
+  div.className = "msg user";
+  div.innerHTML = `<span class="msg-content">${escHtml(text)}</span>${getCopyBtnHTML()}`;
+  chatEl.appendChild(div);
+}
+
+/* Instant bot msg (history load) */
+function addBotMsgInstant(text) {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.innerHTML = `<span class="bot-label">BLANK_</span><span class="msg-content">${escHtml(text)}</span>${getCopyBtnHTML()}`;
+  chatEl.appendChild(div);
+}
+
+/* Spinner while waiting for API */
+function showLoading() {
+  const id  = "loading-" + Date.now();
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.id = id;
+  div.innerHTML = `<span class="bot-label">BLANK_</span><div class="spinner"></div>`;
+  chatEl.appendChild(div);
+  autoScroll();
+  return id;
+}
+
+function removeLoading(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+/* Spinner → typewriter + dots */
+function typeMsg(text) {
+  isTyping = true;
+  userScrolledUp = false;
+
+  const div = document.createElement("div");
+  div.className = "msg bot";
+
+  const label = document.createElement("span");
+  label.className = "bot-label";
+  label.textContent = "BLANK_";
+
+  const spinner = document.createElement("div");
+  spinner.className = "spinner";
+
+  const span = document.createElement("span");
+  span.className = "msg-content";
+
+  const dots = makeDots();
+
+  div.appendChild(label);
+  div.appendChild(spinner);
+  div.appendChild(span);
+  div.appendChild(dots);
+  chatEl.appendChild(div);
+  autoScroll();
+
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      if (i === 0 && spinner.parentNode) spinner.remove();
+      span.textContent += text.charAt(i++);
+      autoScroll();
+      setTimeout(type, 16);
+    } else {
+      isTyping = false;
+      dots.remove();
+      div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
+    }
+  }
+  type();
+}
+
+/* Dot indicator */
+function makeDots() {
+  const w = document.createElement("span");
+  w.className = "dot-typing";
+  w.innerHTML = "<span></span><span></span><span></span>";
+  return w;
+}
+
+/* Copy button */
+function copyText(b) {
+  const span = b.closest(".msg").querySelector(".msg-content");
+  if (!span) return;
+  navigator.clipboard.writeText(span.textContent).then(() => {
+    b.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#00ff87"/></svg>`;
+    setTimeout(() => { b.innerHTML = copyIconSVG(); }, 2000);
+  });
+}
+function copyIconSVG() {
+  return `<svg viewBox="0 0 24 24"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"/></svg>`;
+}
+function getCopyBtnHTML() {
+  return `<button class="copy-btn" onclick="copyText(this)" title="Copy">${copyIconSVG()}</button>`;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ══════════════════════════════════════
+   VOICE
+══════════════════════════════════════ */
+let recognition = null;
+let isListening  = false;
+
+function toggleVoice() {
+  if (isListening) { stopVoice(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { typeMsg("Voice input not supported. Try Chrome or Edge."); return; }
+
+  recognition = new SR();
+  recognition.lang = "en-US";
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add("listening");
+    voiceToast.classList.add("visible");
+  };
+
+  recognition.onresult = (e) => {
+    let interim = "", final = "";
+    for (let i = 0; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      e.results[i].isFinal ? (final += t) : (interim += t);
+    }
+    input.value = final || interim;
+    autoResize();
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove("listening");
+    voiceToast.classList.remove("visible");
+    recognition = null;
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    micBtn.classList.remove("listening");
+    voiceToast.classList.remove("visible");
+    recognition = null;
+    if (e.error !== "no-speech" && e.error !== "aborted") console.warn("Voice:", e.error);
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  if (recognition && isListening) recognition.stop();
+}
+
+/* ══ Init ══ */
+loadSessions();
+
+/* ══ Expose to global scope for onclick handlers ══ */
+window.send              = send;
+window.toggleVoice       = toggleVoice;
+window.toggleSidebar     = toggleSidebar;
+window.closeSidebar      = closeSidebar;
+window.startNewChat      = startNewChat;
+window.deleteSession     = deleteSession;
+window.loadSession       = loadSession;
+window.forceScrollBottom = forceScrollBottom;
+window.copyText          = copyText;
+</script>
+</body>
+</html>
