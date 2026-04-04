@@ -110,7 +110,7 @@ body {
 }
 
 .sidebar-brand {
-  font-size: 0.75rem;
+  font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -119,6 +119,7 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 8s linear infinite;
+  padding: 4px 0;
 }
 
 .new-chat-btn {
@@ -245,14 +246,14 @@ header {
   text-align: center;
   position: absolute;
   top: 0; left: 0; right: 0;
-  z-index: 10;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0) 100%);
+  z-index: 400;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.96) 70%, rgba(0,0,0,0) 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
   display: flex;
   align-items: center;
   gap: 12px;
+  overflow: visible;
 }
 
 /* Menu toggle button */
@@ -326,17 +327,14 @@ header h1 {
 
 .model-dropdown {
   display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #111;
-  border: 1px solid rgba(255,255,255,0.1);
+  position: fixed;
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
   padding: 6px;
-  min-width: 160px;
-  z-index: 300;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+  min-width: 170px;
+  z-index: 9999;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
   flex-direction: column;
   gap: 2px;
 }
@@ -853,7 +851,7 @@ function closeSidebar() {
 
 async function loadSessions() {
   try {
-    const res = await fetch("/sessions");
+    const res = await fetch("/sessions", { credentials: 'include' });
     const data = await res.json();
     renderSessions(data.sessions || []);
   } catch(e) { console.error("Sessions load failed", e); }
@@ -881,7 +879,7 @@ function renderSessions(sessions) {
 
 async function startNewChat() {
   try {
-    const res  = await fetch("/sessions/new", { method: "POST" });
+    const res  = await fetch("/sessions/new", { method: "POST", credentials: 'include' });
     const data = await res.json();
     currentSessId = data.id;
     history = [];
@@ -894,7 +892,7 @@ async function startNewChat() {
 
 async function loadSession(id) {
   try {
-    const res  = await fetch(`/sessions/${id}`);
+    const res  = await fetch(`/sessions/${id}`, { credentials: 'include' });
     const data = await res.json();
     if (data.error) return;
 
@@ -917,7 +915,7 @@ async function loadSession(id) {
 async function deleteSession(e, id) {
   e.stopPropagation();
   try {
-    await fetch(`/sessions/${id}`, { method: "DELETE" });
+    await fetch(`/sessions/${id}`, { method: 'DELETE', credentials: 'include' });
     if (currentSessId === id) {
       currentSessId = null;
       history = [];
@@ -977,7 +975,7 @@ async function send() {
   // Auto-create a session if none active
   if (!currentSessId) {
     try {
-      const r = await fetch("/sessions/new", { method: "POST" });
+      const r = await fetch("/sessions/new", { method: "POST", credentials: 'include' });
       const d = await r.json();
       currentSessId = d.id;
       await loadSessions();
@@ -996,6 +994,7 @@ async function send() {
   try {
     const res = await fetch("/chat", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message:    text,
@@ -1250,6 +1249,15 @@ function toggleModelDropdown() {
   const trigger  = document.getElementById("modelTrigger");
   const dropdown = document.getElementById("modelDropdown");
   const isOpen   = dropdown.classList.contains("open");
+
+  if (!isOpen) {
+    // Position dropdown below trigger using fixed coords
+    const rect = trigger.getBoundingClientRect();
+    dropdown.style.top  = (rect.bottom + 8) + "px";
+    dropdown.style.left = (rect.left + rect.width / 2) + "px";
+    dropdown.style.transform = "translateX(-50%)";
+  }
+
   dropdown.classList.toggle("open", !isOpen);
   trigger.classList.toggle("open", !isOpen);
 }
