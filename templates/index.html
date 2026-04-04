@@ -48,9 +48,7 @@ header {
   padding: 24px 20px;
   text-align: center;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 10;
   background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%);
   backdrop-filter: blur(10px);
@@ -106,7 +104,7 @@ header span {
   flex: 1;
   width: 100%;
   padding-top: 130px;
-  padding-bottom: 140px;
+  padding-bottom: 160px;
   padding-left: max(32px, calc((100% - 780px) / 2));
   padding-right: max(32px, calc((100% - 780px) / 2));
   overflow-y: auto;
@@ -114,6 +112,7 @@ header span {
   flex-direction: column;
   gap: 36px;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 #chat::-webkit-scrollbar { width: 6px; }
@@ -148,7 +147,6 @@ header span {
   color: #a0a0a0;
 }
 
-/* FIX: label is now a real element so it doesn't flash weirdly mid-typing */
 .bot-label {
   display: block;
   font-size: 0.6rem;
@@ -170,12 +168,11 @@ header span {
   transition: opacity 0.2s;
   padding: 4px;
 }
-
 .msg:hover .copy-btn { opacity: 1; }
 .copy-btn svg { width: 14px; height: 14px; fill: #555; transition: fill 0.2s; }
 .copy-btn:hover svg { fill: #fff; }
 
-/* Spinner — shown while waiting AND while typing */
+/* Spinner — waiting for API response */
 .spinner {
   width: 20px;
   height: 20px;
@@ -187,20 +184,38 @@ header span {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Blinking cursor — inline after text during typewriter */
-.cursor-blink {
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  background: rgba(255,255,255,0.4);
+/* Dot typing indicator — shown while bot types */
+.dot-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-left: 3px;
-  vertical-align: text-bottom;
-  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  height: 1em;
 }
-@keyframes blink { 50% { opacity: 0; } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.dot-typing span {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+.dot-typing span:nth-child(1) { animation-delay: 0s; }
+.dot-typing span:nth-child(2) { animation-delay: 0.2s; }
+.dot-typing span:nth-child(3) { animation-delay: 0.4s; }
 
-/* ── Input area ── */
+@keyframes dotBounce {
+  0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
+  30%            { opacity: 1;   transform: translateY(-4px); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Input area */
 .input-area {
   position: fixed;
   bottom: 24px;
@@ -210,9 +225,9 @@ header span {
   max-width: 800px;
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
-  background: rgba(28, 28, 28, 0.7);
+  background: rgba(28, 28, 28, 0.75);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
   padding: 10px 14px;
@@ -221,21 +236,29 @@ header span {
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
   transition: border-color 0.2s;
 }
-
 .input-area:focus-within { border-color: rgba(255,255,255,0.2); }
 
-input {
+/* Expanding textarea */
+#input {
   flex: 1;
   background: transparent;
   border: none;
   color: white;
-  padding: 0 10px;
+  padding: 6px 10px;
   font-size: 1.05rem;
-  min-width: 0; /* FIX: prevents input from overflowing flex container */
+  font-family: var(--font-stack);
+  min-width: 0;
+  resize: none;
+  line-height: 1.5;
+  max-height: 160px;
+  overflow-y: auto;
+  display: block;
 }
-input::placeholder { color: #555; }
+#input::placeholder { color: #555; }
+#input::-webkit-scrollbar { width: 4px; }
+#input::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
-/* ── Mic button ── */
+/* Mic button */
 .mic-btn {
   border: none;
   width: 44px;
@@ -247,19 +270,19 @@ input::placeholder { color: #555; }
   justify-content: center;
   background: transparent;
   transition: background 0.2s;
-  flex-shrink: 0; /* FIX: never squish */
+  flex-shrink: 0;
 }
 .mic-btn svg { width: 20px; height: 20px; fill: #555; transition: fill 0.2s; }
 .mic-btn:hover svg { fill: #bbb; }
-.mic-btn.listening { background: rgba(255, 50, 50, 0.12); }
+.mic-btn.listening { background: rgba(255,50,50,0.12); }
 .mic-btn.listening svg { fill: #ff4444; animation: pulse 1s ease-in-out infinite; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.88); }
+  50%       { opacity: 0.5; transform: scale(0.88); }
 }
 
-/* ── Send button ── */
+/* Send button */
 .send-btn {
   border: none;
   width: 44px;
@@ -272,7 +295,7 @@ input::placeholder { color: #555; }
   background: white;
   transition: transform 0.2s, opacity 0.2s;
   animation: buttonGlow 3s ease-in-out infinite;
-  flex-shrink: 0; /* FIX: never squish */
+  flex-shrink: 0;
 }
 .send-btn:hover { transform: scale(1.05); }
 .send-btn svg { width: 20px; height: 20px; fill: black; transform: translateX(2px); }
@@ -280,10 +303,10 @@ input::placeholder { color: #555; }
 
 @keyframes buttonGlow {
   0%, 100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-  50% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+  50%       { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
 }
 
-/* ── Clear button ── */
+/* Clear button */
 .clear-btn {
   position: fixed;
   top: 16px;
@@ -303,17 +326,17 @@ input::placeholder { color: #555; }
 }
 .clear-btn:hover { color: #aaa; border-color: rgba(255,255,255,0.2); }
 
-/* ── Scroll-to-bottom arrow ── */
+/* Scroll-to-bottom button */
 #scrollBtn {
   position: fixed;
-  bottom: 100px;
+  bottom: 110px;
   left: 50%;
   transform: translateX(-50%) translateY(10px);
   z-index: 99;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(40,40,40,0.9);
+  background: rgba(35,35,35,0.92);
   border: 1px solid rgba(255,255,255,0.12);
   color: #aaa;
   display: flex;
@@ -331,12 +354,12 @@ input::placeholder { color: #555; }
   transform: translateX(-50%) translateY(0);
 }
 #scrollBtn:hover { background: rgba(60,60,60,0.95); color: #fff; }
-#scrollBtn svg { width: 16px; height: 16px; fill: currentColor; }
+#scrollBtn svg { width: 18px; height: 18px; fill: currentColor; }
 
-/* ── Voice indicator toast ── */
+/* Voice toast */
 #voiceToast {
   position: fixed;
-  bottom: 90px;
+  bottom: 96px;
   left: 50%;
   transform: translateX(-50%) translateY(6px);
   background: rgba(255,50,50,0.12);
@@ -360,18 +383,19 @@ input::placeholder { color: #555; }
 
 @media (max-width: 768px) {
   header h1 { font-size: 1.2rem; }
-  .msg { max-width: 90%; font-size: 0.95rem; }
-  #chat { padding: 100px 15px 110px; }
-  .input-area { bottom: 12px; width: 94%; padding: 8px 12px; border-radius: 18px; }
+  .msg { max-width: 92%; font-size: 0.95rem; }
+  #chat { padding: 100px 16px 130px; }
+  .input-area { bottom: 12px; width: 94%; padding: 8px 10px; border-radius: 20px; }
   .copy-btn { opacity: 0.5; bottom: -24px; }
-  #scrollBtn { bottom: 88px; }
-  #voiceToast { bottom: 82px; }
+  #scrollBtn { bottom: 96px; }
+  #voiceToast { bottom: 88px; }
 }
 </style>
 </head>
 
 <body>
 <div class="app-container">
+
   <header>
     <h1>BLANK_</h1>
     <span>System Online</span>
@@ -401,9 +425,13 @@ input::placeholder { color: #555; }
   </div>
 
   <div class="input-area">
-    <input id="input" placeholder="Ask BLANK_" autocomplete="off" />
+    <textarea
+      id="input"
+      placeholder="Ask BLANK_"
+      autocomplete="off"
+      rows="1"
+    ></textarea>
 
-    <!-- Mic button -->
     <button id="micBtn" class="mic-btn" onclick="toggleVoice()" title="Voice input">
       <svg viewBox="0 0 24 24">
         <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3.01 2.83 5.4 5.91 5.88V20H9c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2v-2.02c3.08-.47 5.42-2.87 5.91-5.88.1-.6-.39-1.1-1-1.1z"/>
@@ -411,29 +439,35 @@ input::placeholder { color: #555; }
     </button>
 
     <button id="sendBtn" class="send-btn" onclick="send()">
-      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
     </button>
   </div>
-</div>
 
+</div>
 <script>
-const chat      = document.getElementById("chat");
-const input     = document.getElementById("input");
-const btn       = document.getElementById("sendBtn");
-const micBtn    = document.getElementById("micBtn");
+const chat        = document.getElementById("chat");
+const input       = document.getElementById("input");
+const btn         = document.getElementById("sendBtn");
+const micBtn      = document.getElementById("micBtn");
 const modelSelect = document.getElementById("modelSelect");
-const scrollBtn = document.getElementById("scrollBtn");
-const voiceToast = document.getElementById("voiceToast");
+const scrollBtn   = document.getElementById("scrollBtn");
+const voiceToast  = document.getElementById("voiceToast");
 
 let history = [];
 let userScrolledUp = false;
+let isTyping = false;
 
-/* ── Scroll helpers ── */
+/* ── Scroll ── */
 chat.addEventListener("scroll", () => {
-  const distFromBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight;
-  userScrolledUp = distFromBottom > 80;
+  const dist = chat.scrollHeight - chat.scrollTop - chat.clientHeight;
+  userScrolledUp = dist > 80;
   scrollBtn.classList.toggle("visible", userScrolledUp);
 });
+
+// On mobile touch while typing — user wants to scroll, let them
+chat.addEventListener("touchstart", () => {
+  if (isTyping) userScrolledUp = true;
+}, { passive: true });
 
 function forceScrollBottom() {
   chat.scrollTop = chat.scrollHeight;
@@ -445,21 +479,29 @@ function autoScroll() {
   if (!userScrolledUp) chat.scrollTop = chat.scrollHeight;
 }
 
-/* ── Send on Enter ── */
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") send();
+/* ── Expanding textarea ── */
+function autoResize() {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 160) + "px";
+}
+input.addEventListener("input", autoResize);
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
 });
 
-/* ── Main send ── */
+/* ── Send ── */
 async function send() {
   const text = input.value.trim();
   if (!text || btn.disabled) return;
 
-  // Stop voice if active
   stopVoice();
-
   addUserMsg(text);
   input.value = "";
+  autoResize();
   btn.disabled = true;
   forceScrollBottom();
 
@@ -469,16 +511,12 @@ async function send() {
     const res = await fetch("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: text,
-        history: history,
-        model: modelSelect.value
-      })
+      body: JSON.stringify({ message: text, history, model: modelSelect.value })
     });
 
     removeLoading(loadingId);
-
     if (!res.ok) throw new Error("Server error");
+
     const data = await res.json();
     const reply = (data.reply || "No response received.").trim();
 
@@ -486,7 +524,6 @@ async function send() {
     history.push({ role: "assistant", content: reply });
 
     typeMsg(reply);
-
   } catch (err) {
     removeLoading(loadingId);
     typeMsg("Connection lost. Check system status.");
@@ -505,42 +542,37 @@ function clearChat() {
   div.innerHTML = `<span class="bot-label">BLANK_</span><span class="msg-content">Ready.</span>`;
   chat.appendChild(div);
   userScrolledUp = false;
+  isTyping = false;
   scrollBtn.classList.remove("visible");
 }
 
-/* ── User message (typewriter effect) ── */
+/* ── User message with dot cursor ── */
 function addUserMsg(text) {
   const div = document.createElement("div");
   div.className = "msg user";
-
   const textSpan = document.createElement("span");
   textSpan.className = "msg-content";
-
-  const cursor = document.createElement("span");
-  cursor.className = "cursor-blink";
-
+  const dots = makeDots();
   div.appendChild(textSpan);
-  div.appendChild(cursor);
+  div.appendChild(dots);
   chat.appendChild(div);
   autoScroll();
 
   let i = 0;
   function type() {
     if (i < text.length) {
-      // FIX: use textContent per char — safe, no XSS risk
-      textSpan.textContent += text.charAt(i);
-      i++;
+      textSpan.textContent += text.charAt(i++);
       autoScroll();
       setTimeout(type, 14);
     } else {
-      cursor.remove();
+      dots.remove();
       div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
     }
   }
   type();
 }
 
-/* ── Loading spinner (while waiting for API) ── */
+/* ── Loading spinner (API wait) ── */
 function showLoading() {
   const id = "loading-" + Date.now();
   const div = document.createElement("div");
@@ -557,8 +589,11 @@ function removeLoading(id) {
   if (el) el.remove();
 }
 
-/* ── Bot message with spinner → typewriter ── */
+/* ── Bot message: spinner → typewriter + dots ── */
 function typeMsg(text) {
+  isTyping = true;
+  userScrolledUp = false;
+
   const div = document.createElement("div");
   div.className = "msg bot";
 
@@ -566,52 +601,52 @@ function typeMsg(text) {
   label.className = "bot-label";
   label.textContent = "BLANK_";
 
-  // Spinner shown first, while first chars are buffered
   const spinner = document.createElement("div");
   spinner.className = "spinner";
 
   const textSpan = document.createElement("span");
   textSpan.className = "msg-content";
 
-  const cursor = document.createElement("span");
-  cursor.className = "cursor-blink";
+  const dots = makeDots();
 
   div.appendChild(label);
-  div.appendChild(spinner);   // spinner visible immediately
+  div.appendChild(spinner);
   div.appendChild(textSpan);
-  div.appendChild(cursor);
+  div.appendChild(dots);
   chat.appendChild(div);
   autoScroll();
 
   let i = 0;
-  const speed = 16;
-
   function type() {
     if (i < text.length) {
-      // FIX: remove spinner on very first character
       if (i === 0 && spinner.parentNode) spinner.remove();
-      textSpan.textContent += text.charAt(i);
-      i++;
+      textSpan.textContent += text.charAt(i++);
       autoScroll();
-      setTimeout(type, speed);
+      setTimeout(type, 16);
     } else {
-      cursor.remove();
+      isTyping = false;
+      dots.remove();
       div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
     }
   }
   type();
 }
 
-/* ── Copy button ── */
-function copyText(btnElement) {
-  const msgDiv = btnElement.closest(".msg");
-  const textSpan = msgDiv.querySelector(".msg-content");
+/* ── Dot typing indicator ── */
+function makeDots() {
+  const wrap = document.createElement("span");
+  wrap.className = "dot-typing";
+  wrap.innerHTML = "<span></span><span></span><span></span>";
+  return wrap;
+}
+
+/* ── Copy ── */
+function copyText(btnEl) {
+  const textSpan = btnEl.closest(".msg").querySelector(".msg-content");
   if (!textSpan) return;
   navigator.clipboard.writeText(textSpan.textContent).then(() => {
-    btnElement.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#00ff87"/></svg>`;
-    setTimeout(() => {
-      btnElement.innerHTML = copyIconSVG();
-    }, 2000);
+    btnEl.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#00ff87"/></svg>`;
+    setTimeout(() => { btnEl.innerHTML = copyIconSVG(); }, 2000);
   });
 }
 
@@ -623,32 +658,19 @@ function getCopyBtnHTML() {
   return `<button class="copy-btn" onclick="copyText(this)" title="Copy">${copyIconSVG()}</button>`;
 }
 
-/* ════════════════════════════════════════
-   VOICE INPUT
-   Uses Web Speech API (Chrome/Edge/Safari)
-   ════════════════════════════════════════ */
+/* ── Voice ── */
 let recognition = null;
-let isListening  = false;
+let isListening = false;
 
 function toggleVoice() {
-  if (isListening) {
-    stopVoice();
-    return;
-  }
+  if (isListening) { stopVoice(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { typeMsg("Voice input not supported. Try Chrome or Edge."); return; }
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    // FIX: graceful fallback instead of alert blocking UI
-    typeMsg("Voice input isn't supported in this browser. Try Chrome or Edge.");
-    return;
-  }
-
-  // FIX: always create a fresh instance — reusing a stopped one throws errors
-  recognition = new SpeechRecognition();
+  recognition = new SR();
   recognition.lang = "en-US";
-  recognition.interimResults = true;  // show words as you speak
-  recognition.continuous = false;     // auto-stop after pause
+  recognition.interimResults = true;
+  recognition.continuous = false;
 
   recognition.onstart = () => {
     isListening = true;
@@ -657,15 +679,13 @@ function toggleVoice() {
   };
 
   recognition.onresult = (e) => {
-    // FIX: concat all result segments correctly
-    let interim = "";
-    let final   = "";
+    let interim = "", final = "";
     for (let i = 0; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) final += t;
-      else interim += t;
+      e.results[i].isFinal ? (final += t) : (interim += t);
     }
     input.value = final || interim;
+    autoResize();
   };
 
   recognition.onend = () => {
@@ -680,20 +700,14 @@ function toggleVoice() {
     micBtn.classList.remove("listening");
     voiceToast.classList.remove("visible");
     recognition = null;
-    // Only surface real errors — "no-speech" is normal
-    if (e.error !== "no-speech" && e.error !== "aborted") {
-      console.warn("Voice error:", e.error);
-    }
+    if (e.error !== "no-speech" && e.error !== "aborted") console.warn("Voice error:", e.error);
   };
 
   recognition.start();
 }
 
 function stopVoice() {
-  // FIX: null-check before calling stop — prevents crash on double-tap
-  if (recognition && isListening) {
-    recognition.stop();
-  }
+  if (recognition && isListening) recognition.stop();
 }
 </script>
 </body>
