@@ -249,15 +249,15 @@ header h1 {
 }
 
 .model-pill {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 20px;
   display: inline-block;
   margin-top: 6px;
   padding: 3px 10px;
 }
 .model-pill select {
-  background: transparent;
+  background: #111;
   border: none;
   color: #666;
   cursor: pointer;
@@ -265,8 +265,21 @@ header h1 {
   font-size: 0.55rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 4px;
 }
-.model-pill select option { background: #111; color: #fff; }
+.model-pill select option {
+  background: #111;
+  color: #aaa;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.model-pill select option:checked {
+  color: #00ff87;
+  background: #0a0a0a;
+}
 
 /* placeholder for menu btn on right to balance header */
 .header-right { width: 28px; flex-shrink: 0; }
@@ -645,10 +658,10 @@ body.chat-empty .input-area {
       <span class="header-sub">System Online</span>
       <div class="model-pill">
         <select id="modelSelect">
-          <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-          <option value="llama-3.1-8b-instant">Llama 3.1 8B ⚡</option>
-          <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-          <option value="gemma2-9b-it">Gemma 2 9B</option>
+          <option value="llama-3.1-8b-instant" selected>Flash ⚡</option>
+          <option value="mixtral-8x7b-32768">Balanced</option>
+          <option value="gemma2-9b-it">Precise</option>
+          <option value="llama-3.3-70b-versatile">Reasoning</option>
         </select>
       </div>
     </div>
