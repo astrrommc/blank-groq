@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>BLANK_ — {{ "Sign Up" if mode == "signup" else "Login" }}</title>
+<style>
+:root {
+  --font-stack: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: var(--font-stack);
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.brand h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  background: linear-gradient(110deg, #555 30%, #fff 50%, #555 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 8s linear infinite;
+  text-align: center;
+}
+.brand p {
+  text-align: center;
+  font-size: 0.6rem;
+  color: #444;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+@keyframes shimmer { to { background-position: -200% center; } }
+
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #555;
+}
+.field input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: #fff;
+  font-family: var(--font-stack);
+  font-size: 1rem;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.field input:focus { border-color: rgba(255,255,255,0.25); }
+.field input::placeholder { color: #444; }
+
+.error-msg {
+  background: rgba(255,60,60,0.1);
+  border: 1px solid rgba(255,60,60,0.2);
+  border-radius: 10px;
+  color: #ff6666;
+  font-size: 0.8rem;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.submit-btn {
+  background: #fff;
+  border: none;
+  border-radius: 14px;
+  color: #000;
+  cursor: pointer;
+  font-family: var(--font-stack);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 14px;
+  text-transform: uppercase;
+  transition: opacity 0.2s, transform 0.15s;
+  width: 100%;
+  margin-top: 4px;
+  animation: glow 3s ease-in-out infinite;
+}
+.submit-btn:hover { transform: scale(1.02); }
+.submit-btn:active { transform: scale(0.98); }
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+  50%       { box-shadow: 0 0 24px rgba(255,255,255,0.35); }
+}
+
+.switch {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #444;
+}
+.switch a {
+  color: #888;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.2s;
+}
+.switch a:hover { color: #fff; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <h1>BLANK_</h1>
+    <p>{{ "Create your account" if mode == "signup" else "Welcome back" }}</p>
+  </div>
+
+  <div class="form-box">
+    {% if error %}
+      <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('signup' if mode == 'signup' else 'login') }}">
+      <div class="form-box">
+        <div class="field">
+          <label>Username</label>
+          <input type="text" name="username" placeholder="Enter username" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="Enter password" autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}" required />
+        </div>
+        <button type="submit" class="submit-btn">
+          {{ "Create Account" if mode == "signup" else "Sign In" }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <p class="switch">
+    {% if mode == "signup" %}
+      Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+    {% else %}
+      Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
+    {% endif %}
+  </p>
+</div>
+</body>
+</html>
