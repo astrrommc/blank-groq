@@ -380,6 +380,8 @@ header h1 {
   justify-content: center;
   padding-top: 0;
   padding-bottom: 0;
+  /* Extra bottom space so "Ready." sits above the centered input bar */
+  padding-bottom: 120px;
 }
 #chat::-webkit-scrollbar { width: 5px; }
 #chat::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 4px; }
@@ -502,7 +504,7 @@ header h1 {
 }
 
 /* ═══════════════════════════════
-   INPUT AREA
+   INPUT AREA — bulletproof fixed positioning
 ═══════════════════════════════ */
 .input-area {
   align-items: center;
@@ -516,37 +518,26 @@ header h1 {
   gap: 8px;
   max-width: 680px;
   padding: 8px 12px;
-  width: 100%;
-  transition: border-color 0.2s;
-}
-.input-area:focus-within { border-color: rgba(255,255,255,0.18); }
-
-/* ── EMPTY STATE: input lives inside #chat flow, centered ── */
-body.chat-empty #chat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-body.chat-empty .input-area {
-  position: relative;
-  bottom: auto;
-  left: auto;
-  transform: none;
-}
-
-/* ── ACTIVE STATE: input is fixed at bottom ── */
-body:not(.chat-empty) .input-area {
+  /* Always fixed — we never move it in the DOM */
   position: fixed;
+  z-index: 100;
+  transition: border-color 0.2s, bottom 0.35s cubic-bezier(0.4,0,0.2,1);
+
+  /* Desktop: center in main area (right of sidebar) */
   bottom: 20px;
   left: calc(var(--sidebar-w) + (100% - var(--sidebar-w)) / 2);
   transform: translateX(-50%);
   width: calc(100% - var(--sidebar-w) - 60px);
-  max-width: 680px;
+}
+.input-area:focus-within { border-color: rgba(255,255,255,0.18); }
+
+/* Empty state — lift to screen center */
+body.chat-empty .input-area {
+  bottom: calc(50% - 28px);
 }
 
-/* Sidebar collapsed — active state re-center */
-body:not(.chat-empty).sidebar-collapsed .input-area {
+/* Sidebar collapsed */
+body.sidebar-collapsed .input-area {
   left: calc(var(--strip-w) + (100% - var(--strip-w)) / 2);
   width: calc(100% - var(--strip-w) - 60px);
 }
@@ -687,20 +678,15 @@ body:not(.chat-empty).sidebar-collapsed .input-area {
   .msg { font-size: 0.95rem; max-width: 92%; }
   #chat { padding: 100px 14px 130px; }
 
-  body:not(.chat-empty) .input-area {
-    bottom: 12px !important;
+  .input-area {
+    bottom: 12px;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 94% !important;
     border-radius: 20px;
   }
   body.chat-empty .input-area {
-    position: relative !important;
-    bottom: auto !important;
-    left: auto !important;
-    transform: none !important;
-    width: 90% !important;
-    border-radius: 20px;
+    bottom: calc(50% - 28px);
   }
   #scrollBtn { bottom: 88px; }
   #voiceToast { bottom: 80px; }
@@ -782,8 +768,6 @@ body:not(.chat-empty).sidebar-collapsed .input-area {
     <div class="welcome-msg" id="welcomeMsg">
       <span class="welcome-title">Ready.</span>
     </div>
-    <!-- input placeholder shown in empty state -->
-    <div id="inputProxy"></div>
   </div>
 
   <div class="input-area" id="inputArea">
@@ -820,33 +804,20 @@ let selectedModel  = "llama-3.1-8b-instant";
    EMPTY STATE
 ═══════════════════════════════════════ */
 function checkEmpty() {
-  const msgs    = chatEl.querySelectorAll(".msg");
-  const isEmpty = msgs.length === 0;
-
+  const isEmpty = chatEl.querySelectorAll(".msg").length === 0;
   chatEl.classList.toggle("empty", isEmpty);
   document.body.classList.toggle("chat-empty", isEmpty);
 
-  const inputArea = document.getElementById("inputArea");
-  const proxy     = document.getElementById("inputProxy");
-
-  // Welcome message
+  // Welcome message — just show/hide, never move DOM
   let wm = document.getElementById("welcomeMsg");
   if (isEmpty && !wm) {
     const w = document.createElement("div");
     w.className = "welcome-msg";
     w.id = "welcomeMsg";
     w.innerHTML = `<span class="welcome-title">Ready.</span>`;
-    chatEl.insertBefore(w, proxy || chatEl.firstChild);
+    chatEl.prepend(w);
   } else if (!isEmpty && wm) {
     wm.remove();
-  }
-
-  // Move input area into chat flow when empty, out when active
-  if (isEmpty && proxy && inputArea.parentNode !== chatEl) {
-    chatEl.insertBefore(inputArea, proxy);
-  } else if (!isEmpty && inputArea.parentNode === chatEl) {
-    // Move back to main
-    document.querySelector(".main").appendChild(inputArea);
   }
 }
 
