@@ -6,19 +6,19 @@
 <title>BLANK_</title>
 <style>
 :root {
-  --bg:          #000000;
-  --sidebar-bg:  #0a0a0a;
-  --border:      rgba(255,255,255,0.07);
-  --text:        #ffffff;
-  --muted:       #888888;
-  --font:        "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  --sidebar-w: 260px;
+  --strip-w:   56px;
+  --bg:        #000;
+  --sidebar-bg:#0a0a0a;
+  --border:    rgba(255,255,255,0.07);
+  --font:      "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
 
 body {
   background: var(--bg);
-  color: var(--text);
+  color: #fff;
   font-family: var(--font);
   height: 100dvh;
   width: 100vw;
@@ -26,132 +26,87 @@ body {
   overflow: hidden;
 }
 
-/* ══════════ SIDEBAR ══════════ */
+/* ═══════════════════════════════
+   SIDEBAR
+═══════════════════════════════ */
 #sidebar {
-  width: 260px;
-  min-width: 260px;
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
   height: 100%;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.3s ease, min-width 0.3s ease;
   z-index: 200;
-  flex-shrink: 0;
-  overflow: hidden;
 }
 
-/* Desktop: collapsed sidebar → slim icon strip */
+/* Collapsed desktop strip */
 #sidebar.collapsed {
-  width: 56px;
-  min-width: 56px;
-  overflow: hidden;
+  width: var(--strip-w);
+  min-width: var(--strip-w);
 }
-#sidebar.collapsed .sidebar-header,
-#sidebar.collapsed .sessions-list,
-#sidebar.collapsed .sidebar-footer {
-  display: none;
-}
-#sidebar.collapsed .sidebar-strip {
-  display: flex;
-}
+#sidebar.collapsed .sidebar-full { display: none; }
+#sidebar.collapsed .sidebar-strip { display: flex; }
 
-.sidebar-strip {
-  display: none;
+.sidebar-full {
+  display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 16px 0;
-  gap: 16px;
   height: 100%;
-}
-.strip-brand {
-  font-size: 0.55rem;
-  font-weight: 800;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  background: linear-gradient(110deg, #555 30%, #fff 50%, #555 70%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 8s linear infinite;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  flex: 1;
-  text-align: center;
-}
-.strip-new-btn {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
-  color: #666;
-  cursor: pointer;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, color 0.2s;
-  flex-shrink: 0;
-}
-.strip-new-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.strip-new-btn svg { width: 16px; height: 16px; fill: currentColor; }
-
-/* Mobile: sidebar is overlay */
-#sidebar.open {
-  transform: translateX(0);
 }
 
 .sidebar-header {
-  padding: 20px 16px 12px;
+  padding: 20px 16px 14px;
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .sidebar-brand {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   background: linear-gradient(110deg, #555 30%, #fff 50%, #555 70%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 8s linear infinite;
-  padding: 4px 0;
 }
 
 .new-chat-btn {
+  align-items: center;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 10px;
   color: #aaa;
   cursor: pointer;
+  display: flex;
   font-family: var(--font);
   font-size: 0.7rem;
+  gap: 8px;
   letter-spacing: 0.1em;
-  padding: 8px 12px;
-  text-align: left;
+  padding: 9px 12px;
   text-transform: uppercase;
   transition: background 0.2s, color 0.2s;
   width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 .new-chat-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
-.new-chat-btn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+.new-chat-btn svg { fill: currentColor; flex-shrink: 0; height: 14px; width: 14px; }
 
 .sessions-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 8px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.sessions-list::-webkit-scrollbar { width: 4px; }
+.sessions-list::-webkit-scrollbar { width: 3px; }
 .sessions-list::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
 
 .session-item {
@@ -168,9 +123,9 @@ body {
 .session-item.active { background: rgba(255,255,255,0.08); }
 
 .session-title {
-  color: #aaa;
-  font-size: 0.78rem;
+  color: #888;
   flex: 1;
+  font-size: 0.78rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -180,83 +135,119 @@ body {
 .session-del {
   background: transparent;
   border: none;
-  color: #333;
+  color: #2a2a2a;
   cursor: pointer;
   flex-shrink: 0;
   padding: 2px;
   transition: color 0.2s;
 }
 .session-del:hover { color: #ff4444; }
-.session-del svg { width: 13px; height: 13px; fill: currentColor; }
+.session-del svg { fill: currentColor; height: 13px; width: 13px; }
 
 .sidebar-footer {
-  border-top: 1px solid var(--border);
-  padding: 12px 16px;
-  display: flex;
   align-items: center;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-shrink: 0;
   justify-content: space-between;
+  padding: 12px 16px;
 }
-.sidebar-user {
-  font-size: 0.7rem;
-  color: #555;
-  letter-spacing: 0.05em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.sidebar-user { color: #444; font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .logout-btn {
   background: transparent;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 8px;
   color: #444;
   cursor: pointer;
+  flex-shrink: 0;
   font-family: var(--font);
   font-size: 0.55rem;
   letter-spacing: 0.12em;
   padding: 4px 8px;
   text-transform: uppercase;
   transition: color 0.2s, border-color 0.2s;
+}
+.logout-btn:hover { border-color: rgba(255,255,255,0.18); color: #aaa; }
+
+/* Collapsed strip */
+.sidebar-strip {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  gap: 14px;
+  height: 100%;
+}
+.strip-new-btn {
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  height: 36px;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  width: 36px;
   flex-shrink: 0;
 }
-.logout-btn:hover { color: #aaa; border-color: rgba(255,255,255,0.18); }
+.strip-new-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.strip-new-btn svg { fill: currentColor; height: 16px; width: 16px; }
+.strip-brand {
+  animation: shimmer 8s linear infinite;
+  background: linear-gradient(110deg, #555 30%, #fff 50%, #555 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  flex: 1;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(180deg);
+  writing-mode: vertical-rl;
+}
 
-/* Sidebar overlay for mobile */
+/* Mobile overlay */
 #sidebarOverlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 199;
   backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.6);
+  display: none;
+  inset: 0;
+  position: fixed;
+  z-index: 199;
 }
 #sidebarOverlay.visible { display: block; }
 
-/* ══════════ MAIN AREA ══════════ */
+/* ═══════════════════════════════
+   MAIN
+═══════════════════════════════ */
 .main {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  position: relative;
-  overflow: hidden;
   min-width: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 header {
-  padding: 20px 20px 16px;
-  text-align: center;
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  z-index: 400;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.96) 70%, rgba(0,0,0,0) 100%);
+  align-items: center;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.96) 65%, transparent 100%);
   display: flex;
-  align-items: center;
   gap: 12px;
+  left: 0; right: 0; top: 0;
   overflow: visible;
+  padding: 18px 20px 14px;
+  position: absolute;
+  text-align: center;
+  z-index: 400;
 }
 
-/* Menu toggle button */
 #menuBtn {
   background: transparent;
   border: none;
@@ -267,136 +258,151 @@ header {
   transition: color 0.2s;
 }
 #menuBtn:hover { color: #fff; }
-#menuBtn svg { width: 20px; height: 20px; fill: currentColor; display: block; }
+#menuBtn svg { display: block; fill: currentColor; height: 20px; width: 20px; }
 
 .header-center {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 header h1 {
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
+  animation: shimmer 8s linear infinite;
   background: linear-gradient(110deg, #555 30%, #fff 50%, #555 70%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 8s linear infinite;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
 }
 
 .header-sub {
-  font-size: 0.55rem;
-  color: var(--muted);
+  color: #666;
+  font-size: 0.52rem;
   letter-spacing: 0.2em;
+  margin-top: 2px;
   text-transform: uppercase;
-  margin-top: 3px;
 }
 
-/* Custom model dropdown */
+/* ── Model dropdown ── */
 .model-pill {
   display: inline-block;
-  margin-top: 6px;
+  margin-top: 7px;
   position: relative;
 }
 
 .model-trigger {
+  align-items: center;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 20px;
   color: #777;
   cursor: pointer;
+  display: flex;
   font-family: var(--font);
   font-size: 0.6rem;
+  gap: 5px;
   letter-spacing: 0.12em;
-  padding: 4px 12px 4px 10px;
+  padding: 4px 10px;
   text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 6px;
   transition: border-color 0.2s, color 0.2s;
   user-select: none;
   white-space: nowrap;
 }
-.model-trigger:hover { border-color: rgba(255,255,255,0.22); color: #aaa; }
-.model-trigger svg { width: 10px; height: 10px; fill: currentColor; transition: transform 0.2s; }
+.model-trigger:hover { border-color: rgba(255,255,255,0.2); color: #bbb; }
+.model-trigger svg { fill: currentColor; height: 10px; transition: transform 0.2s; width: 10px; }
 .model-trigger.open svg { transform: rotate(180deg); }
 
 .model-dropdown {
-  display: none;
-  position: fixed;
   background: #141414;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
-  padding: 6px;
-  min-width: 170px;
-  z-index: 9999;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.95);
+  display: none;
   flex-direction: column;
   gap: 2px;
+  min-width: 170px;
+  padding: 6px;
+  position: fixed;
+  z-index: 9999;
 }
 .model-dropdown.open { display: flex; }
 
 .model-option {
   align-items: center;
   border-radius: 9px;
+  color: #777;
   cursor: pointer;
   display: flex;
   font-family: var(--font);
   font-size: 0.72rem;
   justify-content: space-between;
   letter-spacing: 0.06em;
-  padding: 9px 12px;
+  padding: 10px 12px;
   text-transform: uppercase;
-  transition: background 0.15s;
-  color: #888;
+  transition: background 0.15s, color 0.15s;
 }
-.model-option:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.model-option:hover { background: rgba(255,255,255,0.07); color: #fff; }
 .model-option.selected { color: #fff; }
-.model-option .check {
-  width: 8px; height: 8px;
-  border-radius: 50%;
+.model-check {
   background: #00ff87;
-  box-shadow: 0 0 8px rgba(0,255,135,0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0,255,135,0.8);
   flex-shrink: 0;
-  display: none;
+  height: 7px;
+  opacity: 0;
+  width: 7px;
 }
-.model-option.selected .check { display: block; }
+.model-option.selected .model-check { opacity: 1; }
 
-/* placeholder for menu btn on right to balance header */
-.header-right { width: 28px; flex-shrink: 0; }
+.header-right { flex-shrink: 0; width: 28px; }
 
 @keyframes shimmer { to { background-position: -200% center; } }
 
-/* ══════════ CHAT ══════════ */
+/* ═══════════════════════════════
+   CHAT
+═══════════════════════════════ */
 #chat {
-  flex: 1;
-  padding-top: 120px;
-  padding-bottom: 160px;
-  padding-left: max(24px, calc((100% - 720px) / 2));
-  padding-right: max(24px, calc((100% - 720px) / 2));
-  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 32px;
-  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
   overscroll-behavior: contain;
+  padding: 120px max(24px, calc((100% - 720px) / 2)) 160px;
 }
-
-/* Empty state — center everything vertically */
 #chat.empty {
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding-bottom: 60px;
   padding-top: 0;
-  padding-bottom: 80px;
 }
-#chat::-webkit-scrollbar { width: 6px; }
+#chat::-webkit-scrollbar { width: 5px; }
 #chat::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 4px; }
-#chat::-webkit-scrollbar-track { background: transparent; }
 
+/* Welcome */
+.welcome-msg {
+  animation: fadeUp 0.4s ease-out;
+  text-align: center;
+}
+.welcome-title {
+  color: #fff;
+  display: block;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Messages */
 .msg {
   font-size: 1rem;
   line-height: 1.85;
@@ -405,7 +411,6 @@ header h1 {
   position: relative;
   width: fit-content;
 }
-
 .msg-content {
   display: block;
   letter-spacing: 0.01em;
@@ -413,67 +418,47 @@ header h1 {
   word-break: break-word;
 }
 
-.user {
-  align-self: flex-end;
-  animation: slideUp 0.3s ease-out;
-  text-align: left;
-}
+.user { align-self: flex-end; animation: slideUp 0.25s ease-out; }
 .user .msg-content {
-  background: #1e1e1e;
+  background: #1c1c1c;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px 18px 4px 18px;
-  color: #ffffff;
+  color: #fff;
   display: inline-block;
   padding: 10px 16px;
 }
 
-.bot { align-self: flex-start; color: #ffffff; }
-
+.bot { align-self: flex-start; color: #fff; }
 .bot-label {
   color: #fff;
   display: block;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   letter-spacing: 2px;
   line-height: 1;
   margin-bottom: 10px;
-  opacity: 0.3;
+  opacity: 0.25;
 }
 
-/* Empty/welcome state message */
-.welcome-msg {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  animation: slideUp 0.5s ease-out;
-}
-.welcome-msg .welcome-title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-}
-.welcome-msg .welcome-sub {
-  font-size: 0.75rem;
-  color: #444;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Copy btn */
 .copy-btn {
   background: transparent;
   border: none;
-  bottom: -24px;
+  bottom: -22px;
   cursor: pointer;
-  opacity: 0.35;
+  filter: none;
+  opacity: 0.3;
   padding: 4px;
   position: absolute;
   right: 0;
   transition: opacity 0.2s, filter 0.2s;
 }
-.copy-btn svg { fill: #666; height: 14px; transition: fill 0.2s; width: 14px; }
-.copy-btn:hover { opacity: 1; filter: drop-shadow(0 0 6px rgba(255,255,255,0.6)); }
+.copy-btn svg { fill: #777; height: 13px; width: 13px; }
+.copy-btn:hover { filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); opacity: 1; }
 .copy-btn:hover svg { fill: #fff; }
 
 /* Spinner */
@@ -481,7 +466,7 @@ header h1 {
   animation: spin 0.8s linear infinite;
   border: 2px solid rgba(255,255,255,0.08);
   border-radius: 50%;
-  border-top-color: rgba(255,255,255,0.45);
+  border-top-color: rgba(255,255,255,0.5);
   height: 20px;
   margin: 4px 0 2px 2px;
   width: 20px;
@@ -508,44 +493,48 @@ header h1 {
 .dot-typing span:nth-child(1) { animation-delay: 0s; }
 .dot-typing span:nth-child(2) { animation-delay: 0.2s; }
 .dot-typing span:nth-child(3) { animation-delay: 0.4s; }
-
 @keyframes dotBounce {
   0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
   30%            { opacity: 1;   transform: translateY(-4px); }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ══════════ INPUT AREA ══════════ */
+/* ═══════════════════════════════
+   INPUT AREA
+═══════════════════════════════ */
 .input-area {
-  background: rgba(20,20,20,0.85);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+  align-items: center;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(18,18,18,0.88);
   border: 1px solid var(--border);
   border-radius: 24px;
   bottom: 20px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.7);
   display: flex;
-  align-items: center;
   gap: 8px;
-  left: 50%;
   max-width: 720px;
   padding: 8px 12px;
   position: fixed;
-  transform: translateX(-50%);
-  transition: border-color 0.2s, bottom 0.4s cubic-bezier(0.4,0,0.2,1);
-  width: calc(100% - 280px);
+  transition: border-color 0.2s, bottom 0.4s cubic-bezier(0.4,0,0.2,1), left 0.3s ease, transform 0.4s cubic-bezier(0.4,0,0.2,1);
   z-index: 100;
-}
-.input-area:focus-within { border-color: rgba(255,255,255,0.2); }
 
-/* When chat is empty — float input to vertical center */
+  /* Desktop default: center within main (right of sidebar) */
+  left: calc(var(--sidebar-w) + (100% - var(--sidebar-w)) / 2);
+  transform: translateX(-50%);
+  width: calc(100% - var(--sidebar-w) - 60px);
+}
+.input-area:focus-within { border-color: rgba(255,255,255,0.18); }
+
+/* Chat empty → float to vertical center */
 body.chat-empty .input-area {
   bottom: 50%;
   transform: translateX(-50%) translateY(50%);
+}
+
+/* Sidebar collapsed */
+body.sidebar-collapsed .input-area {
+  left: calc(var(--strip-w) + (100% - var(--strip-w)) / 2);
+  width: calc(100% - var(--strip-w) - 60px);
 }
 
 #input {
@@ -560,11 +549,10 @@ body.chat-empty .input-area {
   max-height: 160px;
   min-width: 0;
   overflow-y: auto;
-  padding: 8px 8px;
+  padding: 6px 8px;
   resize: none;
-  vertical-align: middle;
 }
-#input::placeholder { color: #555; }
+#input::placeholder { color: #444; }
 #input::-webkit-scrollbar { width: 3px; }
 #input::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
@@ -576,16 +564,15 @@ body.chat-empty .input-area {
   cursor: pointer;
   display: flex;
   flex-shrink: 0;
-  height: 42px;
+  height: 40px;
   justify-content: center;
   transition: background 0.2s;
-  width: 42px;
+  width: 40px;
 }
-.mic-btn svg { fill: #555; height: 19px; transition: fill 0.2s; width: 19px; }
+.mic-btn svg { fill: #555; height: 18px; transition: fill 0.2s; width: 18px; }
 .mic-btn:hover svg { fill: #bbb; }
 .mic-btn.listening { background: rgba(255,50,50,0.12); }
 .mic-btn.listening svg { animation: pulse 1s ease-in-out infinite; fill: #ff4444; }
-
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.5; transform: scale(0.88); }
@@ -593,32 +580,33 @@ body.chat-empty .input-area {
 
 .send-btn {
   align-items: center;
-  animation: buttonGlow 3s ease-in-out infinite;
+  animation: btnGlow 3s ease-in-out infinite;
   background: #fff;
   border: none;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   flex-shrink: 0;
-  height: 42px;
+  height: 40px;
   justify-content: center;
   transition: transform 0.2s, opacity 0.2s;
-  width: 42px;
+  width: 40px;
 }
-.send-btn:hover { transform: scale(1.05); }
-.send-btn svg { fill: #000; height: 19px; transform: translateX(2px); width: 19px; }
+.send-btn:hover { transform: scale(1.06); }
+.send-btn svg { fill: #000; height: 18px; transform: translateX(2px); width: 18px; }
 .send-btn:disabled { animation: none; opacity: 0.4; transform: none; }
-
-@keyframes buttonGlow {
-  0%, 100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+@keyframes btnGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
   50%       { box-shadow: 0 0 20px rgba(255,255,255,0.45); }
 }
 
-/* ══════════ SCROLL BUTTON ══════════ */
+/* ═══════════════════════════════
+   SCROLL BTN + VOICE TOAST
+═══════════════════════════════ */
 #scrollBtn {
   align-items: center;
   backdrop-filter: blur(10px);
-  background: rgba(30,30,30,0.92);
+  background: rgba(28,28,28,0.92);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 50%;
   bottom: 100px;
@@ -637,14 +625,13 @@ body.chat-empty .input-area {
   z-index: 99;
 }
 #scrollBtn.visible { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
-#scrollBtn:hover { background: rgba(55,55,55,0.95); color: #fff; }
+#scrollBtn:hover { background: rgba(50,50,50,0.95); color: #fff; }
 #scrollBtn svg { fill: currentColor; height: 18px; width: 18px; }
 
-/* ══════════ VOICE TOAST ══════════ */
 #voiceToast {
   backdrop-filter: blur(10px);
   background: rgba(255,50,50,0.1);
-  border: 1px solid rgba(255,80,80,0.22);
+  border: 1px solid rgba(255,80,80,0.2);
   border-radius: 20px;
   bottom: 90px;
   color: #ff6666;
@@ -662,72 +649,68 @@ body.chat-empty .input-area {
 }
 #voiceToast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ══════════ MOBILE ══════════ */
+/* ═══════════════════════════════
+   MOBILE
+═══════════════════════════════ */
 @media (max-width: 700px) {
   #sidebar {
-    position: fixed;
-    top: 0; left: 0;
     height: 100%;
+    left: 0; top: 0;
+    position: fixed;
     transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: var(--sidebar-w) !important;
+    min-width: var(--sidebar-w) !important;
   }
   #sidebar.open { transform: translateX(0); }
+  #sidebar.collapsed { width: var(--sidebar-w) !important; min-width: var(--sidebar-w) !important; }
+  #sidebar.collapsed .sidebar-full { display: flex; }
+  #sidebar.collapsed .sidebar-strip { display: none; }
 
   .main { width: 100%; }
+  header { padding: 14px 16px 12px; }
   header h1 { font-size: 1.1rem; }
-  .msg { max-width: 92%; font-size: 0.95rem; }
-  #chat { padding: 110px 14px 130px; }
-  .input-area { bottom: 12px; width: 94%; border-radius: 20px; padding: 8px 10px; left: 50%; transform: translateX(-50%); }
-  .copy-btn { bottom: -24px; }
-  #scrollBtn { bottom: 90px; }
-  #voiceToast { bottom: 80px; }
-}
+  .msg { font-size: 0.95rem; max-width: 92%; }
+  #chat { padding: 100px 14px 130px; }
 
-/* Desktop: center input within the main area (right of sidebar) */
-@media (min-width: 701px) {
   .input-area {
-    left: calc(260px + (100% - 260px) / 2);
-    transition: left 0.3s ease, bottom 0.4s cubic-bezier(0.4,0,0.2,1), transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    bottom: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 94% !important;
+    border-radius: 20px;
   }
   body.chat-empty .input-area {
-    left: calc(260px + (100% - 260px) / 2);
-    bottom: 50%;
-    transform: translateX(-50%) translateY(50%);
+    bottom: 50% !important;
+    transform: translateX(-50%) translateY(50%) !important;
   }
-  /* Sidebar collapsed to strip — re-center */
-  body.sidebar-collapsed .input-area {
-    left: calc(56px + (100% - 56px) / 2);
-    width: calc(100% - 136px);
-  }
-  body.sidebar-collapsed.chat-empty .input-area {
-    left: calc(56px + (100% - 56px) / 2);
-    bottom: 50%;
-    transform: translateX(-50%) translateY(50%);
-  }
+  #scrollBtn { bottom: 88px; }
+  #voiceToast { bottom: 80px; }
+  .copy-btn { opacity: 0.4; }
 }
 </style>
 </head>
-<body>
+<body class="chat-empty">
 
-<!-- Sidebar overlay (mobile) -->
 <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- Sidebar -->
+<!-- SIDEBAR -->
 <div id="sidebar">
-  <!-- Full sidebar content -->
-  <div class="sidebar-header">
-    <span class="sidebar-brand">BLANK_</span>
-    <button class="new-chat-btn" onclick="startNewChat()">
-      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
-      New Chat
-    </button>
-  </div>
-  <div class="sessions-list" id="sessionsList"></div>
-  <div class="sidebar-footer">
-    <span class="sidebar-user">{{ username }}</span>
-    <a href="/logout" class="logout-btn">Logout</a>
+  <div class="sidebar-full">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">BLANK_</span>
+      <button class="new-chat-btn" onclick="startNewChat()">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+        New Chat
+      </button>
+    </div>
+    <div class="sessions-list" id="sessionsList"></div>
+    <div class="sidebar-footer">
+      <span class="sidebar-user">{{ username }}</span>
+      <a href="/logout" class="logout-btn">Logout</a>
+    </div>
   </div>
 
-  <!-- Collapsed strip (shown when sidebar.collapsed) -->
   <div class="sidebar-strip">
     <button class="strip-new-btn" onclick="startNewChat()" title="New Chat">
       <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
@@ -736,10 +719,10 @@ body.chat-empty .input-area {
   </div>
 </div>
 
-<!-- Main -->
+<!-- MAIN -->
 <div class="main">
   <header>
-    <button id="menuBtn" onclick="toggleSidebar()" title="Menu">
+    <button id="menuBtn" onclick="toggleSidebar()" title="Toggle sidebar">
       <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
     </button>
 
@@ -753,16 +736,16 @@ body.chat-empty .input-area {
         </div>
         <div class="model-dropdown" id="modelDropdown">
           <div class="model-option selected" data-value="llama-3.1-8b-instant" onclick="selectModel(this)">
-            Flash ⚡ <span class="check"></span>
+            Flash ⚡ <span class="model-check"></span>
           </div>
           <div class="model-option" data-value="mixtral-8x7b-32768" onclick="selectModel(this)">
-            Balanced <span class="check"></span>
+            Balanced <span class="model-check"></span>
           </div>
           <div class="model-option" data-value="gemma2-9b-it" onclick="selectModel(this)">
-            Precise <span class="check"></span>
+            Precise <span class="model-check"></span>
           </div>
           <div class="model-option" data-value="llama-3.3-70b-versatile" onclick="selectModel(this)">
-            Reasoning <span class="check"></span>
+            Reasoning <span class="model-check"></span>
           </div>
         </div>
       </div>
@@ -771,7 +754,7 @@ body.chat-empty .input-area {
     <div class="header-right"></div>
   </header>
 
-  <button id="scrollBtn" onclick="forceScrollBottom()" title="Scroll to bottom">
+  <button id="scrollBtn" onclick="forceScrollBottom()">
     <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
   </button>
 
@@ -780,16 +763,13 @@ body.chat-empty .input-area {
   <div id="chat" class="empty">
     <div class="welcome-msg" id="welcomeMsg">
       <span class="welcome-title">Ready.</span>
-      <span class="welcome-sub">Start typing or select a chat</span>
     </div>
   </div>
 
   <div class="input-area">
     <textarea id="input" placeholder="Ask BLANK_" autocomplete="off" rows="1"></textarea>
-    <button id="micBtn" class="mic-btn" onclick="toggleVoice()" title="Voice input">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3.01 2.83 5.4 5.91 5.88V20H9c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2v-2.02c3.08-.47 5.42-2.87 5.91-5.88.1-.6-.39-1.1-1-1.1z"/>
-      </svg>
+    <button id="micBtn" class="mic-btn" onclick="toggleVoice()" title="Voice">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3.01 2.83 5.4 5.91 5.88V20H9c-.55 0-1 .45-1 1s.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1h-2v-2.02c3.08-.47 5.42-2.87 5.91-5.88.1-.6-.39-1.1-1-1.1z"/></svg>
     </button>
     <button id="sendBtn" class="send-btn" onclick="send()">
       <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -798,69 +778,77 @@ body.chat-empty .input-area {
 </div>
 
 <script>
-/* ══ Refs ══ */
-const chatEl      = document.getElementById("chat");
-const input       = document.getElementById("input");
-const btn         = document.getElementById("sendBtn");
-const micBtn      = document.getElementById("micBtn");
-const modelSelect = document.getElementById("modelSelect");
-const scrollBtn   = document.getElementById("scrollBtn");
-const voiceToast  = document.getElementById("voiceToast");
-const sidebar     = document.getElementById("sidebar");
-const overlay     = document.getElementById("sidebarOverlay");
+/* ── Refs ── */
+const chatEl       = document.getElementById("chat");
+const input        = document.getElementById("input");
+const btn          = document.getElementById("sendBtn");
+const micBtn       = document.getElementById("micBtn");
+const scrollBtn    = document.getElementById("scrollBtn");
+const voiceToast   = document.getElementById("voiceToast");
+const sidebar      = document.getElementById("sidebar");
+const overlay      = document.getElementById("sidebarOverlay");
 const sessionsList = document.getElementById("sessionsList");
 
-/* ══ State ══ */
-let history       = [];       // [{role, content}]
-let currentSessId = null;     // active DB session id
+/* ── State ── */
+let history        = [];
+let currentSessId  = null;
 let userScrolledUp = false;
 let isTyping       = false;
+let selectedModel  = "llama-3.1-8b-instant";
 
-/* ══════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════ */
-function isMobile() {
-  return window.innerWidth <= 700;
+/* ═══════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════ */
+function checkEmpty() {
+  const msgs    = chatEl.querySelectorAll(".msg");
+  const isEmpty = msgs.length === 0;
+
+  chatEl.classList.toggle("empty", isEmpty);
+  document.body.classList.toggle("chat-empty", isEmpty);
+
+  let wm = document.getElementById("welcomeMsg");
+  if (isEmpty && !wm) {
+    const w = document.createElement("div");
+    w.className = "welcome-msg";
+    w.id = "welcomeMsg";
+    w.innerHTML = `<span class="welcome-title">Ready.</span>`;
+    chatEl.appendChild(w);
+  } else if (!isEmpty && wm) {
+    wm.remove();
+  }
 }
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+function isMobile() { return window.innerWidth <= 700; }
 
 function toggleSidebar() {
   if (isMobile()) {
-    const open = sidebar.classList.contains("open");
-    open ? closeSidebar() : openSidebar();
+    sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
   } else {
-    // Desktop: collapse/expand inline
-    const collapsed = sidebar.classList.contains("collapsed");
-    if (collapsed) {
-      sidebar.classList.remove("collapsed");
-      // update input centering
-      document.body.classList.remove("sidebar-collapsed");
-    } else {
-      sidebar.classList.add("collapsed");
-      document.body.classList.add("sidebar-collapsed");
-    }
+    const col = sidebar.classList.toggle("collapsed");
+    document.body.classList.toggle("sidebar-collapsed", col);
   }
 }
-function openSidebar() {
-  sidebar.classList.add("open");
-  overlay.classList.add("visible");
-}
-function closeSidebar() {
-  sidebar.classList.remove("open");
-  overlay.classList.remove("visible");
-}
+function openSidebar()  { sidebar.classList.add("open");    overlay.classList.add("visible"); }
+function closeSidebar() { sidebar.classList.remove("open"); overlay.classList.remove("visible"); }
 
+/* ═══════════════════════════════════════
+   SESSION MANAGEMENT
+═══════════════════════════════════════ */
 async function loadSessions() {
   try {
-    const res = await fetch("/sessions", { credentials: 'include' });
+    const res  = await fetch("/sessions", { credentials: "include" });
     const data = await res.json();
     renderSessions(data.sessions || []);
-  } catch(e) { console.error("Sessions load failed", e); }
+  } catch(e) { console.error("loadSessions:", e); }
 }
 
 function renderSessions(sessions) {
   sessionsList.innerHTML = "";
-  if (sessions.length === 0) {
-    sessionsList.innerHTML = `<div style="color:#333;font-size:0.7rem;padding:12px 10px;letter-spacing:0.08em;">No chats yet</div>`;
+  if (!sessions.length) {
+    sessionsList.innerHTML = `<div style="color:#2a2a2a;font-size:0.7rem;padding:14px 10px;letter-spacing:0.08em;">No chats yet</div>`;
     return;
   }
   sessions.forEach(s => {
@@ -868,8 +856,8 @@ function renderSessions(sessions) {
     div.className = "session-item" + (s.id === currentSessId ? " active" : "");
     div.dataset.id = s.id;
     div.innerHTML = `
-      <span class="session-title" title="${escHtml(s.title)}">${escHtml(s.title)}</span>
-      <button class="session-del" onclick="deleteSession(event, ${s.id})" title="Delete">
+      <span class="session-title">${escHtml(s.title)}</span>
+      <button class="session-del" onclick="deleteSession(event,${s.id})" title="Delete">
         <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
       </button>`;
     div.addEventListener("click", () => loadSession(s.id));
@@ -878,8 +866,18 @@ function renderSessions(sessions) {
 }
 
 async function startNewChat() {
+  // If current session has no messages, reuse it — don't create another empty one
+  if (currentSessId) {
+    const msgs = chatEl.querySelectorAll(".msg");
+    if (msgs.length === 0) {
+      // Already on an empty chat — just focus input
+      closeSidebar();
+      input.focus();
+      return;
+    }
+  }
   try {
-    const res  = await fetch("/sessions/new", { method: "POST", credentials: 'include' });
+    const res  = await fetch("/sessions/new", { method: "POST", credentials: "include" });
     const data = await res.json();
     currentSessId = data.id;
     history = [];
@@ -887,12 +885,12 @@ async function startNewChat() {
     await loadSessions();
     closeSidebar();
     input.focus();
-  } catch(e) { console.error("New session failed", e); }
+  } catch(e) { console.error("startNewChat:", e); }
 }
 
 async function loadSession(id) {
   try {
-    const res  = await fetch(`/sessions/${id}`, { credentials: 'include' });
+    const res  = await fetch(`/sessions/${id}`, { credentials: "include" });
     const data = await res.json();
     if (data.error) return;
 
@@ -900,86 +898,76 @@ async function loadSession(id) {
     history = data.messages.map(m => ({ role: m.role, content: m.content }));
 
     clearChatUI();
-    // Render history instantly (no typewriter — it's already saved)
     data.messages.forEach(m => {
       if (m.role === "user") addUserMsgInstant(m.content);
       else addBotMsgInstant(m.content);
     });
 
+    checkEmpty();
     forceScrollBottom();
-    await loadSessions(); // re-render to show active
+    await loadSessions();
     closeSidebar();
-  } catch(e) { console.error("Load session failed", e); }
+  } catch(e) { console.error("loadSession:", e); }
 }
 
 async function deleteSession(e, id) {
   e.stopPropagation();
   try {
-    await fetch(`/sessions/${id}`, { method: 'DELETE', credentials: 'include' });
+    await fetch(`/sessions/${id}`, { method: "DELETE", credentials: "include" });
     if (currentSessId === id) {
       currentSessId = null;
       history = [];
       clearChatUI();
     }
     await loadSessions();
-  } catch(err) { console.error("Delete failed", err); }
+  } catch(e) { console.error("deleteSession:", e); }
 }
 
-/* ══════════════════════════════════════
+/* ═══════════════════════════════════════
    SCROLL
-══════════════════════════════════════ */
+═══════════════════════════════════════ */
 chatEl.addEventListener("scroll", () => {
   const dist = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight;
   userScrolledUp = dist > 80;
   scrollBtn.classList.toggle("visible", userScrolledUp);
 });
-
-// Any touch on chat = stop hijacking scroll immediately
-chatEl.addEventListener("touchstart", () => {
-  userScrolledUp = true;
-}, { passive: true });
-
-chatEl.addEventListener("wheel", () => {
-  userScrolledUp = true;
-}, { passive: true });
+chatEl.addEventListener("touchstart", () => { userScrolledUp = true; }, { passive: true });
+chatEl.addEventListener("wheel",      () => { userScrolledUp = true; }, { passive: true });
 
 function forceScrollBottom() {
   chatEl.scrollTop = chatEl.scrollHeight;
   userScrolledUp = false;
   scrollBtn.classList.remove("visible");
 }
+function autoScroll() { if (!userScrolledUp) chatEl.scrollTop = chatEl.scrollHeight; }
 
-function autoScroll() {
-  if (!userScrolledUp) chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-/* ══════════════════════════════════════
-   TEXTAREA AUTO-RESIZE
-══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   TEXTAREA
+═══════════════════════════════════════ */
 function autoResize() {
   input.style.height = "auto";
   input.style.height = Math.min(input.scrollHeight, 160) + "px";
 }
 input.addEventListener("input", autoResize);
-input.addEventListener("keydown", (e) => {
+input.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
 });
 
-/* ══════════════════════════════════════
+/* ═══════════════════════════════════════
    SEND
-══════════════════════════════════════ */
+═══════════════════════════════════════ */
 async function send() {
   const text = input.value.trim();
   if (!text || btn.disabled) return;
 
-  // Auto-create a session if none active
+  // Auto-create session if none
   if (!currentSessId) {
     try {
-      const r = await fetch("/sessions/new", { method: "POST", credentials: 'include' });
+      const r = await fetch("/sessions/new", { method: "POST", credentials: "include" });
       const d = await r.json();
       currentSessId = d.id;
       await loadSessions();
-    } catch(e) { /* continue without saving */ }
+    } catch(e) { /* continue */ }
   }
 
   stopVoice();
@@ -989,22 +977,17 @@ async function send() {
   btn.disabled = true;
   forceScrollBottom();
 
-  const loadingId = showLoading();
+  const loadId = showLoading();
 
   try {
     const res = await fetch("/chat", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message:    text,
-        history:    history,
-        model:      selectedModel,
-        session_id: currentSessId
-      })
+      body: JSON.stringify({ message: text, history, model: selectedModel, session_id: currentSessId })
     });
 
-    removeLoading(loadingId);
+    removeLoading(loadId);
     if (!res.ok) throw new Error("Server error");
 
     const data  = await res.json();
@@ -1015,11 +998,10 @@ async function send() {
 
     typeMsg(reply);
 
-    // Refresh sidebar title after first message
-    if (history.length === 2) loadSessions();
+    if (history.length === 2) loadSessions(); // refresh title
 
   } catch(err) {
-    removeLoading(loadingId);
+    removeLoading(loadId);
     typeMsg("Connection lost. Check system status.");
   } finally {
     btn.disabled = false;
@@ -1027,37 +1009,19 @@ async function send() {
   }
 }
 
-/* ══════════════════════════════════════
-   UI HELPERS
-══════════════════════════════════════ */
-function checkEmpty() {
-  const isEmpty = chatEl.querySelectorAll(".msg").length === 0;
-  chatEl.classList.toggle("empty", isEmpty);
-  document.body.classList.toggle("chat-empty", isEmpty);
-  // Show/hide welcome message
-  let wm = document.getElementById("welcomeMsg");
-  if (isEmpty && !wm) {
-    const w = document.createElement("div");
-    w.className = "welcome-msg";
-    w.id = "welcomeMsg";
-    w.innerHTML = `<span class="welcome-title">Ready.</span><span class="welcome-sub">Start typing or select a chat</span>`;
-    chatEl.appendChild(w);
-  } else if (!isEmpty && wm) {
-    wm.remove();
-  }
-}
-
+/* ═══════════════════════════════════════
+   CHAT UI HELPERS
+═══════════════════════════════════════ */
 function clearChatUI() {
   chatEl.innerHTML = "";
-  userScrolledUp = false;
   isTyping = false;
+  userScrolledUp = false;
   scrollBtn.classList.remove("visible");
   checkEmpty();
 }
 
-/* Typewriter user msg */
 function addUserMsg(text) {
-  const div = document.createElement("div");
+  const div  = document.createElement("div");
   div.className = "msg user";
   const span = document.createElement("span");
   span.className = "msg-content";
@@ -1065,24 +1029,17 @@ function addUserMsg(text) {
   div.appendChild(span);
   div.appendChild(dots);
   chatEl.appendChild(div);
+  checkEmpty();
   autoScroll();
 
-  checkEmpty();
   let i = 0;
   function type() {
-    if (i < text.length) {
-      span.textContent += text.charAt(i++);
-      autoScroll();
-      setTimeout(type, 14);
-    } else {
-      dots.remove();
-      div.insertAdjacentHTML("beforeend", getCopyBtnHTML());
-    }
+    if (i < text.length) { span.textContent += text.charAt(i++); autoScroll(); setTimeout(type, 14); }
+    else { dots.remove(); div.insertAdjacentHTML("beforeend", getCopyBtnHTML()); }
   }
   type();
 }
 
-/* Instant user msg (history load) */
 function addUserMsgInstant(text) {
   const div = document.createElement("div");
   div.className = "msg user";
@@ -1090,7 +1047,6 @@ function addUserMsgInstant(text) {
   chatEl.appendChild(div);
 }
 
-/* Instant bot msg (history load) */
 function addBotMsgInstant(text) {
   const div = document.createElement("div");
   div.className = "msg bot";
@@ -1098,9 +1054,8 @@ function addBotMsgInstant(text) {
   chatEl.appendChild(div);
 }
 
-/* Spinner while waiting for API */
 function showLoading() {
-  const id  = "loading-" + Date.now();
+  const id  = "load-" + Date.now();
   const div = document.createElement("div");
   div.className = "msg bot";
   div.id = id;
@@ -1109,31 +1064,22 @@ function showLoading() {
   autoScroll();
   return id;
 }
+function removeLoading(id) { const el = document.getElementById(id); if (el) el.remove(); }
 
-function removeLoading(id) {
-  const el = document.getElementById(id);
-  if (el) el.remove();
-}
-
-/* Spinner → typewriter + dots */
 function typeMsg(text) {
   isTyping = true;
   userScrolledUp = false;
 
-  const div = document.createElement("div");
+  const div    = document.createElement("div");
   div.className = "msg bot";
-
-  const label = document.createElement("span");
+  const label  = document.createElement("span");
   label.className = "bot-label";
   label.textContent = "BLANK_";
-
   const spinner = document.createElement("div");
   spinner.className = "spinner";
-
-  const span = document.createElement("span");
+  const span   = document.createElement("span");
   span.className = "msg-content";
-
-  const dots = makeDots();
+  const dots   = makeDots();
 
   div.appendChild(label);
   div.appendChild(spinner);
@@ -1158,7 +1104,6 @@ function typeMsg(text) {
   type();
 }
 
-/* Dot indicator */
 function makeDots() {
   const w = document.createElement("span");
   w.className = "dot-typing";
@@ -1166,7 +1111,6 @@ function makeDots() {
   return w;
 }
 
-/* Copy button */
 function copyText(b) {
   const span = b.closest(".msg").querySelector(".msg-content");
   if (!span) return;
@@ -1181,14 +1125,49 @@ function copyIconSVG() {
 function getCopyBtnHTML() {
   return `<button class="copy-btn" onclick="copyText(this)" title="Copy">${copyIconSVG()}</button>`;
 }
-
-function escHtml(str) {
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-/* ══════════════════════════════════════
+/* ═══════════════════════════════════════
+   MODEL DROPDOWN
+═══════════════════════════════════════ */
+function toggleModelDropdown() {
+  const trigger  = document.getElementById("modelTrigger");
+  const dropdown = document.getElementById("modelDropdown");
+  const isOpen   = dropdown.classList.contains("open");
+
+  if (!isOpen) {
+    const rect = trigger.getBoundingClientRect();
+    dropdown.style.top       = (rect.bottom + 6) + "px";
+    dropdown.style.left      = (rect.left + rect.width / 2) + "px";
+    dropdown.style.transform = "translateX(-50%)";
+  }
+
+  dropdown.classList.toggle("open", !isOpen);
+  trigger.classList.toggle("open", !isOpen);
+}
+
+function selectModel(el) {
+  document.querySelectorAll(".model-option").forEach(o => o.classList.remove("selected"));
+  el.classList.add("selected");
+  selectedModel = el.dataset.value;
+  document.getElementById("modelLabel").textContent = el.childNodes[0].textContent.trim();
+  document.getElementById("modelDropdown").classList.remove("open");
+  document.getElementById("modelTrigger").classList.remove("open");
+}
+
+document.addEventListener("click", e => {
+  const pill = document.getElementById("modelPill");
+  if (pill && !pill.contains(e.target)) {
+    document.getElementById("modelDropdown").classList.remove("open");
+    document.getElementById("modelTrigger").classList.remove("open");
+  }
+});
+
+/* ═══════════════════════════════════════
    VOICE
-══════════════════════════════════════ */
+═══════════════════════════════════════ */
 let recognition = null;
 let isListening  = false;
 
@@ -1202,13 +1181,10 @@ function toggleVoice() {
   recognition.interimResults = true;
   recognition.continuous = false;
 
-  recognition.onstart = () => {
-    isListening = true;
-    micBtn.classList.add("listening");
-    voiceToast.classList.add("visible");
-  };
-
-  recognition.onresult = (e) => {
+  recognition.onstart  = () => { isListening = true;  micBtn.classList.add("listening");    voiceToast.classList.add("visible"); };
+  recognition.onend    = () => { isListening = false; micBtn.classList.remove("listening"); voiceToast.classList.remove("visible"); recognition = null; };
+  recognition.onerror  = e  => { isListening = false; micBtn.classList.remove("listening"); voiceToast.classList.remove("visible"); recognition = null; };
+  recognition.onresult = e  => {
     let interim = "", final = "";
     for (let i = 0; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
@@ -1218,89 +1194,29 @@ function toggleVoice() {
     autoResize();
   };
 
-  recognition.onend = () => {
-    isListening = false;
-    micBtn.classList.remove("listening");
-    voiceToast.classList.remove("visible");
-    recognition = null;
-  };
-
-  recognition.onerror = (e) => {
-    isListening = false;
-    micBtn.classList.remove("listening");
-    voiceToast.classList.remove("visible");
-    recognition = null;
-    if (e.error !== "no-speech" && e.error !== "aborted") console.warn("Voice:", e.error);
-  };
-
   recognition.start();
 }
+function stopVoice() { if (recognition && isListening) recognition.stop(); }
 
-function stopVoice() {
-  if (recognition && isListening) recognition.stop();
-}
-
-/* ══════════════════════════════════════
-   CUSTOM MODEL DROPDOWN
-══════════════════════════════════════ */
-let selectedModel = "llama-3.1-8b-instant";
-
-function toggleModelDropdown() {
-  const trigger  = document.getElementById("modelTrigger");
-  const dropdown = document.getElementById("modelDropdown");
-  const isOpen   = dropdown.classList.contains("open");
-
-  if (!isOpen) {
-    // Position dropdown below trigger using fixed coords
-    const rect = trigger.getBoundingClientRect();
-    dropdown.style.top  = (rect.bottom + 8) + "px";
-    dropdown.style.left = (rect.left + rect.width / 2) + "px";
-    dropdown.style.transform = "translateX(-50%)";
-  }
-
-  dropdown.classList.toggle("open", !isOpen);
-  trigger.classList.toggle("open", !isOpen);
-}
-
-function selectModel(el) {
-  // Deselect all
-  document.querySelectorAll(".model-option").forEach(o => o.classList.remove("selected"));
-  // Select clicked
-  el.classList.add("selected");
-  selectedModel = el.dataset.value;
-  // Update trigger label (text node only, not the check span)
-  document.getElementById("modelLabel").textContent = el.childNodes[0].textContent.trim();
-  // Close dropdown
-  document.getElementById("modelDropdown").classList.remove("open");
-  document.getElementById("modelTrigger").classList.remove("open");
-}
-
-// Close dropdown when clicking outside
-document.addEventListener("click", (e) => {
-  const pill = document.getElementById("modelPill");
-  if (pill && !pill.contains(e.target)) {
-    document.getElementById("modelDropdown").classList.remove("open");
-    document.getElementById("modelTrigger").classList.remove("open");
-  }
-});
-
-/* ══ Init ══ */
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
 checkEmpty();
 loadSessions();
 
-/* ══ Expose to global scope for onclick handlers ══ */
-window.checkEmpty        = checkEmpty;
-window.send              = send;
+/* Expose for onclick */
+window.send               = send;
+window.toggleSidebar      = toggleSidebar;
+window.closeSidebar       = closeSidebar;
+window.startNewChat       = startNewChat;
+window.loadSession        = loadSession;
+window.deleteSession      = deleteSession;
+window.forceScrollBottom  = forceScrollBottom;
+window.copyText           = copyText;
+window.toggleVoice        = toggleVoice;
 window.toggleModelDropdown = toggleModelDropdown;
-window.selectModel       = selectModel;
-window.toggleVoice       = toggleVoice;
-window.toggleSidebar     = toggleSidebar;
-window.closeSidebar      = closeSidebar;
-window.startNewChat      = startNewChat;
-window.deleteSession     = deleteSession;
-window.loadSession       = loadSession;
-window.forceScrollBottom = forceScrollBottom;
-window.copyText          = copyText;
+window.selectModel        = selectModel;
+window.checkEmpty         = checkEmpty;
 </script>
 </body>
 </html>
